@@ -1,2 +1,17 @@
 ---
 # Role default lower priority variables
+
+# List of dicts with groups to configure. The dicts have the same attributes
+# that the ones expected by the ansible group module. For example:
+#
+# groups:
+#   - name: somegroup
+#     gid: 2500
+
+groups_list: []
+
+# Dicitionary with the defaults options to use if no other ones are specified in
+# the `groups_list` variable. The members of the dict are the same attributes
+# that the ones expected by the ansible group module
+
+groups_defaults: {}
