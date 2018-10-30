@@ -1,2 +1,51 @@
 ---
 # Tasks for testing role
+
+- name: run idempotence test
+  hosts: localhost
+  roles:
+    - role: amtega.docker_presets
+      docker_presets_images_json_query: >-
+        [? starts_with(name, `centos-6`)
+           || starts_with(name, `centos-7`)
+           || starts_with(name, `fedora-27`)
+           || starts_with(name, `fedora-28`) ]
+
+    - role: amtega.docker_sandbox
+      docker_sandbox_state: started
+  tags:
+    - sandbox
+
+- name: test groups role
+  hosts: docker_sandbox_containers
+  roles:
+    - amtega.groups
+  vars:
+    groups_list:
+      - name: group1
+        gid: 1041
+      - name: group2
+        gid: 1042
+    groups_defaults:
+      state: present
+  tasks:
+    - name: read /etc/group file
+      shell: cat /etc/group
+      changed_when: false
+      register: read_group_result
+
+    - name: check that /etc/group contains required groups
+      assert:
+        that:
+          - read_group_result.stdout is search("group1")
+          - read_group_result.stdout is search("group1")
+  tags:
+    - idempotence
+
+- name: cleanup docker docker sandbox
+  hosts: localhost
+  roles:
+    - role: amtega.docker_sandbox
+      docker_sandbox_state: absent
+  tags:
+    - sandbox
