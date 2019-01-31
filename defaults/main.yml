@@ -15,3 +15,10 @@ groups_list: []
 # that the ones expected by the ansible group module
 
 groups_defaults: {}
+
+# Indicate `groups_list` must be loaded also from host variables. Any host
+# variable that begins with "groups_*" and contains the necessary attributes
+# will be loaded as an item to manage by the role. The variables must follow the
+# structure detailed before for `groups_list`
+
+groups_load_from_hostvars: no

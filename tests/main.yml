@@ -17,16 +17,26 @@
   tags:
     - sandbox
 
+- name: prepare docker containers for test
+  hosts: docker_sandbox_containers
+  tasks:
+    - name: setup extra groups
+      set_fact:
+        groups_extra:
+          name: group2
+          gid: 1042
+  tags:
+    - idempotence
+
 - name: test groups role
   hosts: docker_sandbox_containers
   roles:
-    - amtega.groups
+    - role: amtega.groups
+      groups_load_from_hostvars: yes
   vars:
     groups_list:
       - name: group1
         gid: 1041
-      - name: group2
-        gid: 1042
     groups_defaults:
       state: present
   tasks:
