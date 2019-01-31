@@ -2,6 +2,21 @@
 # Role tasks
 
 - block:
+    - name: setup fact with groups loaded from host variables
+      include_role:
+        name: amtega.select_hostvars
+        apply:
+          tags:
+            - role::groups
+      vars:
+        select_hostvars_pattern: "^groups_.*"
+        select_hostvars_exclude_pattern: "^groups_(defaults|list)$"
+        select_hostvars_attributes:
+          - name
+        select_hostvars_fact_name: groups_hostvars
+        select_hostvars_output_type: list
+      when: groups_load_from_hostvars
+
     - name: setup groups
       group:
         gid: >-
@@ -12,7 +27,10 @@
           {{ item.state | default(groups_defaults.state) | default(omit) }}
         system : >-
           {{ item.system | default(groups_defaults.system) | default(omit) }}
-      loop: "{{ groups_list }}"
+      loop: >-
+        {{ groups_list
+           + ((groups_load_from_hostvars)
+              | ternary(groups_hostvars | default([]) | flatten, [])) }}
       loop_control:
         label: "{{ item.name }}"
   tags:
