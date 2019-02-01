@@ -21,11 +21,11 @@
       group:
         gid: >-
           {{ item.gid | default(groups_defaults.gid) | default(omit) }}
-        name : >-
+        name: >-
           {{ item.name | default(groups_defaults.name) | default(omit) }}
         state: >-
           {{ item.state | default(groups_defaults.state) | default(omit) }}
-        system : >-
+        system: >-
           {{ item.system | default(groups_defaults.system) | default(omit) }}
       loop: >-
         {{ groups_list
