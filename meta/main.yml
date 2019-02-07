@@ -31,3 +31,10 @@ dependencies:
       debian: 9
       fedora: 27
       rhel: 6
+
+  - role: amtega.packages
+    packages_os:
+      all:
+        all:
+          grep: present
+          libuser: present
