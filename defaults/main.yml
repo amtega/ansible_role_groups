@@ -22,3 +22,22 @@ groups_defaults: {}
 # structure detailed before for `groups_list`
 
 groups_load_from_hostvars: no
+
+# Indicate what to do with orphan users result of a group deletion. Can be:
+#
+# - `move`: move orphan users to the group specified in the variable
+#   `groups_orphan_users_group`
+# - `remove`: delete orphan users
+# - `error`: raise error if the deletion of a group could lead to orphan users.
+
+groups_orphan_users_action: error
+
+# Group to move in orphan users if the variable `groups_orphan_users_action` is
+# set to `move`
+
+groups_orphan_users_group: nobody
+
+# Indicate if orphan user removal must be forced if `groups_orphan_users_action` is
+# set to `remove`
+
+groups_orphan_users_force_removal: no
