@@ -34,9 +34,13 @@
     - role: amtega.groups
       groups_load_from_hostvars: yes
   vars:
+    groups_orphan_users_action: remove
     groups_list:
       - name: group1
         gid: 1041
+
+      - name: ftp
+        state: absent
     groups_defaults:
       state: present
   tasks:
@@ -59,4 +63,5 @@
     - role: amtega.docker_sandbox
       docker_sandbox_state: absent
   tags:
+    - cleanup
     - sandbox

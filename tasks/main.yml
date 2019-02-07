@@ -24,8 +24,8 @@
             && lid --onlynames --group {{ groups_item.name }}
           args:
             warn: no
-          failed_when: no
           register: groups_lid_result
+          failed_when: no
           changed_when: no
           loop: "{{ groups_to_remove }}"
           loop_control:
@@ -60,7 +60,6 @@
             loop_var: groups_lid_item
             index_var: groups_lid_item_index
             label: >-
-              {{ groups_lid_item.0.groups_item.name }}
               {{ groups_lid_item.1 | trim }}
               {{ (groups_orphan_users_action == "move")
                  | ternary("move", "remove") }}

@@ -33,7 +33,7 @@ dependencies:
       rhel: 6
 
   - role: amtega.packages
-    os_packages:
+    packages_os:
       all:
         all:
           grep: present
