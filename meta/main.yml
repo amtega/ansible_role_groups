@@ -31,6 +31,8 @@ dependencies:
       debian: 9
       fedora: 27
       rhel: 6
+    tags:
+      - role::groups               
 
   - role: amtega.packages
     packages_os:
@@ -38,3 +40,16 @@ dependencies:
         all:
           grep: present
           libuser: present
+    tags:
+      - role::groups
+
+  - role: amtega.select_hostvars
+    select_hostvars_pattern: "^groups_.*"
+    select_hostvars_exclude_pattern: "^groups_(defaults|list)$"
+    select_hostvars_attributes:
+      - name
+    select_hostvars_fact_name: groups_hostvars
+    select_hostvars_output_type: list
+    when: groups_load_from_hostvars
+    tags:
+      - role::groups
