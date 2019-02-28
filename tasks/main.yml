@@ -2,107 +2,91 @@
 # Role tasks
 
 - block:
-    - name: setup fact with groups loaded from host variables
-      include_role:
-        name: amtega.select_hostvars
-        apply:
-          tags:
-            - role::groups
-      vars:
-        select_hostvars_pattern: "^groups_.*"
-        select_hostvars_exclude_pattern: "^groups_(defaults|list)$"
-        select_hostvars_attributes:
-          - name
-        select_hostvars_fact_name: groups_hostvars
-        select_hostvars_output_type: list
-      when: groups_load_from_hostvars
+    - name: gather groups members
+      shell: >-
+        getent group | grep "^{{ groups_item.name }}:" > /dev/null
+        && lid --onlynames --group {{ groups_item.name }}
+      args:
+        warn: no
+      register: groups_lid_result
+      failed_when: no
+      changed_when: no
+      loop: "{{ groups_to_remove }}"
+      loop_control:
+        loop_var: groups_item
+        label: "{{ groups_item.name }}"
 
-    - block:
-        - name: gather groups members
-          shell: >-
-            getent group | grep "^{{ groups_item.name }}:" > /dev/null
-            && lid --onlynames --group {{ groups_item.name }}
-          args:
-            warn: no
-          register: groups_lid_result
-          failed_when: no
-          changed_when: no
-          loop: "{{ groups_to_remove }}"
-          loop_control:
-            loop_var: groups_item
-            label: "{{ groups_item.name }}"
+    - name: raise error if role execution would lead to orphan users
+      fail:
+        msg: >-
+          deletion of group {{ groups_item.name }} leads to orphan
+          users
+      when: >-
+        groups_orphan_users_action == "error"
+        and groups_lid_result.results[groups_index].stdout_lines
+            | length > 0
+      loop: "{{ groups_to_remove }}"
+      loop_control:
+        loop_var: groups_item
+        index_var: groups_index
+        label: "{{ groups_item.name }}"
 
-        - name: raise error if role execution would lead to orphan users
-          fail:
-            msg: >-
-              deletion of group {{ groups_item.name }} leads to orphan
-              users
-          when: >-
-            groups_orphan_users_action == "error"
-            and groups_lid_result.results[groups_index].stdout_lines
-                | length > 0
-          loop: "{{ groups_to_remove }}"
-          loop_control:
-            loop_var: groups_item
-            index_var: groups_index
-            label: "{{ groups_item.name }}"
+    - name: manage orphan users
+      user:
+        name: "{{ groups_lid_item.1 | trim }}"
+        force: "{{ groups_orphan_users_force_removal }}"
+        state: >-
+          {{ (groups_orphan_users_action == "move")
+             | ternary("present", "absent") }}
+        group: "{{ groups_orphan_users_group }}"
+      loop: "{{ groups_lid_result.results | subelements('stdout_lines') }}"
+      loop_control:
+        loop_var: groups_lid_item
+        index_var: groups_lid_item_index
+        label: >-
+          {{ groups_lid_item.1 | trim }}
+          {{ (groups_orphan_users_action == "move")
+             | ternary("move", "remove") }}
 
-        - name: manage orphan users
-          user:
-            name: "{{ groups_lid_item.1 | trim }}"
-            force: "{{ groups_orphan_users_force_removal }}"
-            state: >-
-              {{ (groups_orphan_users_action == "move")
-                 | ternary("present", "absent") }}
-            group: "{{ groups_orphan_users_group }}"
-          loop: "{{ groups_lid_result.results | subelements('stdout_lines') }}"
-          loop_control:
-            loop_var: groups_lid_item
-            index_var: groups_lid_item_index
-            label: >-
-              {{ groups_lid_item.1 | trim }}
-              {{ (groups_orphan_users_action == "move")
-                 | ternary("move", "remove") }}
+    - name: setup groups
+      group:
+        gid: >-
+          {{ groups_item.gid
+             | default(groups_defaults.gid)
+             | default(omit) }}
+        name: >-
+          {{ groups_item.name
+             | default(groups_defaults.name)
+             | default(omit) }}
+        state: >-
+          {{ groups_item.state
+             | default(groups_defaults.state)
+             | default(omit) }}
+        system: >-
+          {{ groups_item.system
+             | default(groups_defaults.system)
+             | default(omit) }}
+      loop: "{{ groups_to_manage }}"
+      loop_control:
+        loop_var: groups_item
+        label: "{{ groups_item.name }}"
+  vars:
+    groups_to_manage: >-
+      {{ groups_list
+         + ((groups_load_from_hostvars)
+            | ternary(groups_hostvars | default([]) | flatten, [])) }}
 
-        - name: setup groups
-          group:
-            gid: >-
-              {{ groups_item.gid
-                 | default(groups_defaults.gid)
-                 | default(omit) }}
-            name: >-
-              {{ groups_item.name
-                 | default(groups_defaults.name)
-                 | default(omit) }}
-            state: >-
-              {{ groups_item.state
-                 | default(groups_defaults.state)
-                 | default(omit) }}
-            system: >-
-              {{ groups_item.system
-                 | default(groups_defaults.system)
-                 | default(omit) }}
-          loop: "{{ groups_to_manage }}"
-          loop_control:
-            loop_var: groups_item
-            label: "{{ groups_item.name }}"
-      vars:
-        groups_to_manage: >-
-          {{ groups_list
-             + ((groups_load_from_hostvars)
-                | ternary(groups_hostvars | default([]) | flatten, [])) }}
+    groups_state_undefined: >-
+      {{ groups_to_manage
+         | selectattr("state", "undefined")
+         | list }}
 
-        groups_state_undefined: >-
-          {{ groups_to_manage
-             | selectattr("state", "undefined")
-             | list }}
-
-        groups_to_remove: >-
-          {{ groups_to_manage
-             | selectattr("state", "defined")
-             | selectattr("state", "equalto", "absent")
-             | list
-             + (groups_defaults.state | default("present") == "absent")
-               | ternary(groups_state_undefined, []) }}
+    groups_to_remove: >-
+      {{ groups_to_manage
+         | selectattr("state", "defined")
+         | selectattr("state", "equalto", "absent")
+         | list
+         + (groups_defaults.state | default("present") == "absent")
+           | ternary(groups_state_undefined, []) }}
   tags:
     - role::groups
