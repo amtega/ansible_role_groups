@@ -32,7 +32,7 @@ dependencies:
       fedora: 27
       rhel: 6
     tags:
-      - role::groups               
+      - role::groups
 
   - role: amtega.packages
     packages_os:
