@@ -39,7 +39,11 @@
           {{ (groups_orphan_users_action == "move")
              | ternary("present", "absent") }}
         group: "{{ groups_orphan_users_group }}"
-      loop: "{{ groups_lid_result.results | subelements('stdout_lines') }}"
+      loop: >-
+        {{ groups_lid_result.results
+           | selectattr('stdout_lines', 'defined')
+           | list
+           | subelements('stdout_lines') }}
       loop_control:
         loop_var: groups_lid_item
         index_var: groups_lid_item_index
