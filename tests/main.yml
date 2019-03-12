@@ -1,7 +1,7 @@
 ---
 # Tasks for testing role
 
-- name: run idempotence test
+- name: Run idempotence test
   hosts: localhost
   roles:
     - role: amtega.docker_presets
@@ -17,10 +17,10 @@
   tags:
     - sandbox
 
-- name: prepare docker containers for test
+- name: Prepare docker containers for test
   hosts: docker_sandbox_containers
   tasks:
-    - name: setup extra groups
+    - name: Setup extra groups
       set_fact:
         groups_extra:
           name: group2
@@ -28,7 +28,7 @@
   tags:
     - idempotence
 
-- name: test groups role
+- name: Test groups role
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.groups
@@ -36,20 +36,20 @@
   vars:
     groups_orphan_users_action: remove
     groups_list:
-      - name: group1
+      - name: Group1
         gid: 1041
 
-      - name: ftp
+      - name: Ftp
         state: absent
     groups_defaults:
       state: present
   tasks:
-    - name: read /etc/group file
+    - name: Read /etc/group file
       shell: cat /etc/group
       changed_when: false
       register: read_group_result
 
-    - name: check that /etc/group contains required groups
+    - name: Check that /etc/group contains required groups
       assert:
         that:
           - read_group_result.stdout is search("group1")
@@ -57,7 +57,7 @@
   tags:
     - idempotence
 
-- name: cleanup docker docker sandbox
+- name: Cleanup docker docker sandbox
   hosts: localhost
   roles:
     - role: amtega.docker_sandbox
