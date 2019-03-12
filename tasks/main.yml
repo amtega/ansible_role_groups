@@ -2,7 +2,7 @@
 # Role tasks
 
 - block:
-    - name: gather groups members
+    - name: Gather groups members
       shell: >-
         getent group | grep "^{{ groups_item.name }}:" > /dev/null
         && lid --onlynames --group {{ groups_item.name }}
@@ -16,7 +16,7 @@
         loop_var: groups_item
         label: "{{ groups_item.name }}"
 
-    - name: raise error if role execution would lead to orphan users
+    - name: Raise error if role execution would lead to orphan users
       fail:
         msg: >-
           deletion of group {{ groups_item.name }} leads to orphan
@@ -31,7 +31,7 @@
         index_var: groups_index
         label: "{{ groups_item.name }}"
 
-    - name: manage orphan users
+    - name: Manage orphan users
       user:
         name: "{{ groups_lid_item.1 | trim }}"
         force: "{{ groups_orphan_users_force_removal }}"
@@ -52,7 +52,7 @@
           {{ (groups_orphan_users_action == "move")
              | ternary("move", "remove") }}
 
-    - name: setup groups
+    - name: Setup groups
       group:
         gid: >-
           {{ groups_item.gid
