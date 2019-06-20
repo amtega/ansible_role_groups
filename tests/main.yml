@@ -46,7 +46,7 @@
   tasks:
     - name: Read /etc/group file
       shell: cat /etc/group
-      changed_when: false
+      changed_when: no
       register: read_group_result
 
     - name: Check that /etc/group contains required groups

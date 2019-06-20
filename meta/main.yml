@@ -54,6 +54,6 @@ dependencies:
           - name
         fact_name: groups_hostvars
         output_type: list
-    when: groups_load_from_hostvars
+    when: groups_load_from_hostvars | bool
     tags:
       - role::groups
