@@ -1,0 +1,16 @@
+---
+
+- name: Verify
+  hosts: molecule_hosts
+  gather_facts: no
+  tasks:
+    - name: Read /etc/group file
+      shell: cat /etc/group
+      changed_when: no
+      register: read_group_result
+
+    - name: Check that /etc/group contains required groups
+      assert:
+        that:
+          - read_group_result.stdout is search("group1")
+          - read_group_result.stdout is search("group1")
