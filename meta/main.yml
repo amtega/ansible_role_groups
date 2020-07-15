@@ -13,6 +13,7 @@ galaxy_info:
       versions:
         - 6
         - 7
+        - 8
     - name: Fedora
       versions:
         - 29
@@ -27,9 +28,7 @@ dependencies:
       check_platform_distributions:
         centos: 6
         fedora: 29
-        rhel: 6
-    tags:
-      - role::groups
+        redhat: 6
 
   - role: amtega.packages
     vars:
@@ -38,8 +37,6 @@ dependencies:
           all:
             grep: present
             libuser: present
-    tags:
-      - role::groups
 
   - role: amtega.select_hostvars
     vars:
@@ -51,5 +48,3 @@ dependencies:
         fact_name: groups_hostvars
         output_type: list
     when: groups_load_from_hostvars | bool
-    tags:
-      - role::groups
