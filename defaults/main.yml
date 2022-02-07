@@ -37,7 +37,7 @@ groups_orphan_users_action: error
 
 groups_orphan_users_group: nobody
 
-# Indicate if orphan user removal must be forced if `groups_orphan_users_action` is
-# set to `remove`
+# Indicate if orphan user removal must be forced if `groups_orphan_users_action`
+# is set to `remove`
 
 groups_orphan_users_force_removal: no
