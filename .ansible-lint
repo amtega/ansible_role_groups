@@ -2,7 +2,3 @@
 
 exclude_paths:
   - meta
-
-skip_list:
-  - command-instead-of-shell
-  # Use shell only when shell functionality is required
