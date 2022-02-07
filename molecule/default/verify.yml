@@ -5,7 +5,7 @@
   gather_facts: no
   tasks:
     - name: Read /etc/group file
-      shell: cat /etc/group
+      command: cat /etc/group      
       changed_when: no
       register: read_group_result
 
