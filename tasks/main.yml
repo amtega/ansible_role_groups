@@ -1,9 +1,9 @@
 ---
-# Role tasks
 
-- block:
+- name: Setup groups
+  block:
     - name: Gather groups members
-      shell: >-
+      ansible.builtin.shell: >-
         getent group | grep "^{{ groups_item.name }}:" > /dev/null
         && lid --onlynames --group {{ groups_item.name }}
       args:
@@ -17,7 +17,7 @@
         label: "{{ groups_item.name }}"
 
     - name: Raise error if role execution would lead to orphan users
-      fail:
+      ansible.builtin.fail:
         msg: >-
           deletion of group {{ groups_item.name }} leads to orphan
           users
@@ -32,7 +32,7 @@
         label: "{{ groups_item.name }}"
 
     - name: Manage orphan users
-      user:
+      ansible.builtin.user:
         name: "{{ groups_lid_item.1 | trim }}"
         force: "{{ groups_orphan_users_force_removal }}"
         state: >-
@@ -53,7 +53,7 @@
              | ternary("move", "remove") }}
 
     - name: Setup groups
-      group:
+      ansible.builtin.group:
         gid: >-
           {{ groups_item.gid
              | default(groups_defaults.gid)
